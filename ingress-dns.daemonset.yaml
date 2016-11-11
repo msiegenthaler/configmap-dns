@@ -1,0 +1,36 @@
+# Provides DNS resolution for "public" names that are exposed via an ingress.
+# Use the configmap to configure
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: ingress-dns-v1
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: ingress
+        role: external-dns
+        version: v1
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: bind
+        image: msiegenthaler/configmap-dns:v1
+        imagePullPolicy: Always
+        ports:
+        - name: dns-tcp
+          containerPort: 53
+          hostPort: 53
+          protocol:  TCP
+        - name: dns-udp
+          containerPort: 53
+          hostPort: 53
+          protocol:  UDP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/bind
+      volumes:
+        - name: config
+          configMap:
+            name: ingress-dns

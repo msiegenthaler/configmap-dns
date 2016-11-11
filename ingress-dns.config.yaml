@@ -1,0 +1,30 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ingress-dns
+  namespace: kube-system
+data:
+  # change demo.mydomain and demo.mydomain.com to your desired domain
+  # you may also have more than one segment here..
+  named.conf: |
+    options {
+        directory "/etc/bind";
+        allow-recursion { any; };
+        allow-transfer { any; };
+        allow-update { any; };
+    };
+    zone "demo.mydomain.com." IN {
+       type master;
+       file "demo.mydomain.zone";
+       allow-transfer { any; };
+    };
+  demo.mydomain.zone: |
+    @  IN SOA  . root.demo.mydomain.com. (
+                 20161111  ; serial number of zone file (yyyymmdd##)
+                 5M        ; refresh time
+                 1M        ; retry time in case of problem
+                 5M        ; expiry time
+                 1H)       ; maximum caching time in case of failed lookups
+       IN NS     .
+       IN A      37.187.164.231
+    *  IN A      37.187.164.231
